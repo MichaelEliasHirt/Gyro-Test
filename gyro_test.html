@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gyro Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f0f0f0; color: #333; text-align: center; }
+        button { padding: 20px 40px; font-size: 24px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: background-color 0.3s ease; }
+        button:hover { background-color: #45a049; }
+        button:active { background-color: #3e8e41; transform: translateY(2px); }
+        h1 { color: #2c3e50; margin-bottom: 30px; }
+        p { margin: 10px 0; }
+        #status { font-weight: bold; color: #2980b9; }
+        #data { color: #7f8c8d; }
+        #log { margin-top: 30px; padding: 15px; border: 1px solid #ccc; background-color: #f9f9f9; width: 80%; max-width: 500px; text-align: left; font-family: monospace; font-size: 14px; white-space: pre-wrap; word-wrap: break-word; max-height: 200px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>Gyroscope Permission Test</h1>
+    <button id="requestPermissionButton">Request Gyroscope Access</button>
+    <p id="status">Status: Waiting...</p>
+    <p id="data">Alpha: N/A, Beta: N/A, Gamma: N/A</p>
+    <div id="log">Console Log:</div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const dataDiv = document.getElementById('data');
+        const requestButton = document.getElementById('requestPermissionButton');
+        const logDiv = document.getElementById('log');
+
+        let hasGyroscopeAPI = false;
+        let needsPermission = false;
+        let permissionGranted = false;
+        let activeGyroscope = false; // Indicates if we're receiving non-null data
+
+        // Function to append messages to the on-page log
+        function appendToLog(message) {
+            const now = new Date();
+            const timestamp = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
+            logDiv.innerHTML += `<br>[${timestamp}] ${message}`;
+            logDiv.scrollTop = logDiv.scrollHeight; // Scroll to bottom
+            console.log(message); // Also send to browser console if available
+        }
+
+        function updateStatus() {
+            statusDiv.textContent = `Status: API Supported: ${hasGyroscopeAPI}, Needs Perm: ${needsPermission}, Perm Granted: ${permissionGranted}, Active Gyro: ${activeGyroscope}`;
+        }
+
+        function onDeviceOrientationChange(event) {
+            // Check if any of the rotation properties are non-null
+            if (event.alpha !== null || event.beta !== null || event.gamma !== null) {
+                activeGyroscope = true;
+                dataDiv.textContent = `Alpha: ${event.alpha.toFixed(2)}, Beta: ${event.beta.toFixed(2)}, Gamma: ${event.gamma.toFixed(2)}`;
+            } else {
+                activeGyroscope = false;
+                dataDiv.textContent = `Alpha: null, Beta: null, Gamma: null (No data yet or denied)`;
+            }
+            updateStatus();
+        }
+
+        // Initial check for DeviceOrientationEvent API support on page load
+        (function() {
+            if (window.DeviceOrientationEvent) {
+                hasGyroscopeAPI = true;
+                appendToLog("DeviceOrientationEvent API is supported by the browser.");
+                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    needsPermission = true;
+                    appendToLog("DeviceOrientationEvent.requestPermission available. Permission will be needed on iOS 13+.");
+                } else {
+                    // No explicit permission needed (Android, older iOS) - add listener directly
+                    appendToLog("DeviceOrientationEvent.requestPermission not required. Adding listener.");
+                    window.addEventListener('deviceorientation', onDeviceOrientationChange, true);
+                }
+            } else {
+                hasGyroscopeAPI = false;
+                appendToLog("DeviceOrientationEvent API not supported by this browser.");
+                requestButton.disabled = true; // Disable button if no support
+                requestButton.textContent = "Gyro Not Supported";
+            }
+            updateStatus();
+            appendToLog("Initial checks complete. Ready for button press.");
+        })();
+
+
+        // Event listener for the button click
+        requestButton.addEventListener('click', () => {
+            appendToLog("Button clicked: Attempting to request gyroscope access.");
+            if (hasGyroscopeAPI) {
+                if (needsPermission) {
+                    appendToLog("Calling DeviceOrientationEvent.requestPermission()...");
+                    DeviceOrientationEvent.requestPermission()
+                        .then(permissionState => {
+                            if (permissionState === 'granted') {
+                                appendToLog("Permission granted! Adding deviceorientation listener.");
+                                permissionGranted = true;
+                                window.addEventListener('deviceorientation', onDeviceOrientationChange, true);
+                            } else {
+                                appendToLog("Permission denied by user or browser!");
+                                permissionGranted = false;
+                            }
+                            updateStatus();
+                        })
+                        .catch(error => {
+                            appendToLog("Error during permission request: " + error.message);
+                            console.error("Full permission request error:", error);
+                            permissionGranted = false;
+                            updateStatus();
+                        });
+                } else {
+                    appendToLog("No explicit permission needed. Listener should already be active.");
+                    // For non-iOS 13+ devices, just reconfirming the listener is active
+                    window.addEventListener('deviceorientation', onDeviceOrientationChange, true); // Re-add for safety
+                }
+            } else {
+                appendToLog("DeviceOrientationEvent API not supported. Button disabled.");
+            }
+        });
+
+        appendToLog("Script loaded and event listener attached.");
+    </script>
+</body>
+</html>
