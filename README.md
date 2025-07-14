@@ -1,0 +1,1 @@
+This is my first game that is playable in Android. It has been made using a tutorial on Gamedev.TV, with Assets from there. I is playable on the web right now, but there will be a downloadable .apk and .exe. 
