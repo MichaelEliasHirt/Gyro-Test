@@ -79,9 +79,9 @@
     <div id="permissionScreen">
         <h1>Welcome!</h1>
         <p>This game uses your device's motion sensors for an immersive experience.</p>
-        <p>Please grant permission to enable gyroscope.</p>
+        <p id="permissionPromptText">Please grant permission to enable gyroscope.</p>
         <button id="requestPermissionButton">Enable Gyroscope & Play</button>
-        <p id="status">Status: Waiting for interaction...</p>
+        <p id="status">Status: Initializing...</p>
     </div>
 
     <div id="gameContainer">
@@ -93,19 +93,27 @@
         const gameContainer = document.getElementById('gameContainer');
         const requestButton = document.getElementById('requestPermissionButton');
         const statusParagraph = document.getElementById('status');
+        const permissionPromptText = document.getElementById('permissionPromptText');
         const gameFrame = document.getElementById('gameFrame');
 
-        const GODOT_GAME_HTML_FILE = 'game/game.html'; // <<< IMPORTANT: CHANGE THIS to your Godot exported HTML filename!
+        // IMPORTANT: CHANGE THIS PATH to point to your Godot game's HTML file inside the 'game/' subfolder!
+        const GODOT_GAME_HTML_FILE = 'game/my_godot_game.html';
 
         function updateStatus(message) {
             statusParagraph.textContent = "Status: " + message;
-            console.log("Permission Loader Log: " + message); // For browser console if accessible
+            console.log("Permission Loader Log: " + message);
+        }
+
+        function loadGodotGame() {
+            updateStatus("Loading game...");
+            permissionScreen.style.display = 'none'; // Hide permission screen
+            gameContainer.style.display = 'block'; // Show game container
+            gameFrame.src = GODOT_GAME_HTML_FILE; // Load your Godot game into the iframe
         }
 
         requestButton.addEventListener('click', () => {
             updateStatus("Button clicked. Requesting permission...");
 
-            // Check if DeviceOrientationEvent.requestPermission is available (iOS 13+)
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
                 DeviceOrientationEvent.requestPermission()
                     .then(permissionState => {
@@ -124,28 +132,34 @@
                         loadGodotGame(); // Load game even if there's an error
                     });
             } else {
-                // Not iOS 13+ or not Safari - permission not required explicitly
-                updateStatus("No explicit permission needed. Loading game...");
+                // This branch should ideally not be hit if the button is visible,
+                // but included for completeness.
+                updateStatus("No explicit permission needed. Loading game directly.");
                 loadGodotGame();
             }
         });
 
-        function loadGodotGame() {
-            permissionScreen.style.display = 'none'; // Hide permission screen
-            gameContainer.style.display = 'block'; // Show game container
-            gameFrame.src = GODOT_GAME_HTML_FILE; // Load your Godot game into the iframe
-            // Optionally, request fullscreen on the iframe if the user clicks again or automatically
-            // This iframe has the 'allow' attributes needed for fullscreen and sensors.
-        }
-
-        // Initial check for secure context
-        if (!window.isSecureContext) {
-            updateStatus("WARNING: Not a secure context (HTTPS). Gyroscope will NOT work!");
-            requestButton.disabled = true;
-            requestButton.textContent = "HTTPS Required!";
-        } else {
-            updateStatus("Ready. Please click the button.");
-        }
+        // --- NEW LOGIC FOR AUTOMATIC LOADING ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.isSecureContext) {
+                updateStatus("WARNING: Not a secure context (NOT HTTPS). Gyroscope will NOT work!");
+                requestButton.disabled = true;
+                requestButton.textContent = "HTTPS Required!";
+                permissionPromptText.textContent = "This site is not secure (HTTPS). Motion sensor access requires HTTPS.";
+            } else if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // This is an iOS 13+ Safari browser, explicit permission is needed
+                updateStatus("Ready. Click 'Enable Gyroscope & Play' to continue.");
+                requestButton.style.display = 'block'; // Ensure button is visible
+                permissionPromptText.style.display = 'block'; // Ensure text is visible
+            } else {
+                // Permission not explicitly required (e.g., Android, Desktop, older iOS)
+                updateStatus("No explicit permission needed. Loading game automatically...");
+                requestButton.style.display = 'none'; // Hide the button
+                permissionPromptText.style.display = 'none'; // Hide the prompt text
+                loadGodotGame(); // Load the game directly
+            }
+        });
+        // --- END NEW LOGIC ---
     </script>
 </body>
 
