@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://bg7vh4d8f57ew"]
+
+[ext_resource type="Texture2D" uid="uid://cw0ax4jpvvjhr" path="res://assets/godot_mobile_assets/textures/platform/Platform.png" id="1_lieim"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lieim"]
+size = Vector2(134, 5)
+
+[node name="Platform" type="StaticBody2D"]
+collision_layer = 2
+collision_mask = 32
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_lieim")
+centered = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(74, 2.5)
+shape = SubResource("RectangleShape2D_lieim")
+one_way_collision = true

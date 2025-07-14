@@ -1,0 +1,55 @@
+[gd_scene load_steps=7 format=3 uid="uid://c5cns4qy3lvla"]
+
+[ext_resource type="Script" uid="uid://0qwbu7hn351r" path="res://game/game.gd" id="1_80nbo"]
+[ext_resource type="Texture2D" uid="uid://bvabrutafal1b" path="res://assets/godot_mobile_assets/textures/bg/Ground.png" id="2_e2o6t"]
+[ext_resource type="PackedScene" uid="uid://b4yqck5txinne" path="res://UI/hud.tscn" id="2_ryrav"]
+[ext_resource type="Texture2D" uid="uid://da6d5pjtpe3er" path="res://assets/godot_mobile_assets/textures/bg/Layer1.png" id="3_7jktm"]
+[ext_resource type="Texture2D" uid="uid://bnw5or27ns076" path="res://assets/godot_mobile_assets/textures/bg/Layer2.png" id="4_ryrav"]
+[ext_resource type="Texture2D" uid="uid://dck2so5l1qwlm" path="res://assets/godot_mobile_assets/textures/bg/Layer3.png" id="5_eow3j"]
+
+[node name="Game" type="Node2D"]
+script = ExtResource("1_80nbo")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="HUD" parent="CanvasLayer" instance=ExtResource("2_ryrav")]
+visible = false
+
+[node name="PlatformParent" type="Node2D" parent="."]
+
+[node name="GroundSprite" type="Sprite2D" parent="."]
+z_index = -1
+position = Vector2(270, 960)
+scale = Vector2(1, 0.7)
+texture = ExtResource("2_e2o6t")
+offset = Vector2(0, -60)
+
+[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
+
+[node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0.1, 0.1)
+motion_mirroring = Vector2(0, 1935)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
+scale = Vector2(0.675, 0.675)
+texture = ExtResource("3_7jktm")
+centered = false
+
+[node name="ParallaxLayer2" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0.5, 0.5)
+motion_mirroring = Vector2(0, 1935)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer2"]
+scale = Vector2(0.675, 0.675)
+texture = ExtResource("4_ryrav")
+centered = false
+
+[node name="ParallaxLayer3" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0.85, 0.85)
+motion_mirroring = Vector2(0, 1935)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer3"]
+scale = Vector2(0.675, 0.675)
+texture = ExtResource("5_eow3j")
+centered = false

@@ -1,0 +1,68 @@
+[gd_scene load_steps=6 format=3 uid="uid://b4yqck5txinne"]
+
+[ext_resource type="Script" uid="uid://dcuolc27lkihc" path="res://UI/hud.gd" id="1_2o5uh"]
+[ext_resource type="Texture2D" uid="uid://bixg3bw5mu68n" path="res://assets/godot_mobile_assets/textures/ui/ScoreBox.png" id="1_bytes"]
+[ext_resource type="Texture2D" uid="uid://dsd47apnihwis" path="res://assets/godot_mobile_assets/textures/ui/PauseBtn.png" id="2_2o5uh"]
+[ext_resource type="Script" uid="uid://dytl24alr1los" path="res://UI/screen_button.gd" id="4_b1lf8"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_b1lf8"]
+font_size = 40
+font_color = Color(0, 0, 0, 1)
+
+[node name="HUD" type="Control"]
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 102.0
+grow_horizontal = 2
+script = ExtResource("1_2o5uh")
+
+[node name="BlackBG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.686275)
+
+[node name="TopBar" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 100.0
+grow_horizontal = 2
+
+[node name="ScoreBox" type="TextureRect" parent="TopBar"]
+layout_mode = 0
+offset_right = 324.0
+offset_bottom = 98.0
+texture = ExtResource("1_bytes")
+expand_mode = 1
+stretch_mode = 4
+
+[node name="ScoreLabel" type="Label" parent="TopBar/ScoreBox"]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 21.0
+offset_right = 297.0
+offset_bottom = 82.0
+text = "99999"
+label_settings = SubResource("LabelSettings_b1lf8")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="HUD_Btn" type="TextureButton" parent="TopBar" groups=["buttons"]]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -110.0
+offset_bottom = 101.0
+grow_horizontal = 0
+texture_normal = ExtResource("2_2o5uh")
+stretch_mode = 3
+script = ExtResource("4_b1lf8")
+metadata/_custom_type_script = "uid://dytl24alr1los"
+
+[connection signal="pressed" from="TopBar/HUD_Btn" to="TopBar/HUD_Btn" method="_on_pressed"]
